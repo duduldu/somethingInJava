@@ -1,0 +1,164 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+        <meta name="HandheldFriendly" content="true"/>
+        <meta name="MobileOptimized" content="320"/>
+        <title>调用系统分享</title>
+        <script src="../js/mui.js" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript">
+            var pictures = [];  //分享的图片数据数组
+            var picNum = 0; //本地图片已经添加到上面数组中的数量，包括下载成功或者失败的
+            var picLength = 0; //后台请求获取的图片数组长度
+            var relativePathArr = [];   //分享完成后删除下载的本地图片
+
+
+            mui.init(); //mui初始化
+
+            mui.plusReady(function() {
+
+                    var shareSystem = document.getElementById("shareSystem");
+                    shareSystem.addEventListener("tap",function(){
+                        //每次点击都先重置变量
+                        pictures=[];
+                        picNum = 0; 
+                        picLength = 0; 
+                        relativePathArr = [];
+
+                        //模拟请求接口获取图片数组
+                        var imgArr = [
+                            "http://v.ruthout.com/files/course/2017/05-08/133735f9295e681844.jpg",
+                            "http://v.ruthout.com/files/course/2017/05-02/101138a5ce28404936.jpg",
+                            "http://v.ruthout.com/files/course/2017/04-12/180859bee06e205896.jpg",
+                            "http://v.ruthout.com/files/course/2017/04-06/095527f140c2257143.jpg",
+                        ]
+
+                        picLength = imgArr.length;
+
+                        for(var i=0;i<picLength;i++){
+                            setImg("img"+i , imgArr[i]);
+                        }
+                    })
+            });
+
+
+             /*
+             *1.从本地获取,如果本地存在,则直接设置图片
+             *2.如果本地不存在则网络下载,缓存到本地,再设置图片
+             * */
+            function setImg(imgId, loadUrl) {
+                if (imgId == null || loadUrl == null) return;
+                //图片下载成功 默认保存在本地相对路径的"_downloads"文件夹里面, 如"_downloads/logo.jpg"
+                var filename = loadUrl.substring(loadUrl.lastIndexOf("/") + 1, loadUrl.length);
+                var relativePath = "_downloads/" + filename;
+                relativePathArr.push(relativePath); //存储起来等分享结束后删除数据使用
+
+                //检查图片是否已存在
+                plus.io.resolveLocalFileSystemURL(relativePath, function(entry) {
+                        console.log("存在")
+                    //如果文件存在,则直接设置本地图片
+                    setImgFromLocal(imgId, relativePath);
+                }, function(e) {
+                        console.log("下载")
+                    //如果文件不存在,联网下载图片
+                    setImgFromNet (imgId,loadUrl,relativePath);
+                });
+            }
+
+            /*给图片标签<img>设置本地图片
+             * imgId 图片标签<img>的id
+             * relativePath 本地相对路径 例如:"_downloads/logo.jpg"
+             */
+            function setImgFromLocal(imgId, relativePath) {
+                //本地相对路径("_downloads/logo.jpg")转成SD卡绝对路径("/storage/emulated/0/Android/data/io.dcloud.HBuilder/.HBuilder/downloads/logo.jpg");
+                var sd_path = plus.io.convertLocalFileSystemURL(relativePath);
+                pictures.push("file://"+sd_path);
+                picNum++;
+
+                console.log(picLength);
+                console.log(picNum);
+                //这里要注意picNu ++的地方，要在图片下载完成后或者失败后；
+
+               if(picLength == picNum){
+                    console.log("开始分享")
+                    //确定全部图片都下载到本地后调分享
+                    var msg = {
+                        pictures:pictures
+                    };
+
+                    plus.share.sendWithSystem(msg, function(){
+
+                        for(var i=0;i<relativePathArr.length;i++){
+                            if (relativePathArr[i]!=null)
+                             delFile(relativePathArr[i]);
+                        }
+                    }, function(e){
+
+                        for(var i=0;i<relativePathArr.length;i++){
+                            if (relativePathArr[i]!=null)
+                             delFile(relativePathArr[i]);
+                        }
+                    });
+               }
+            }
+
+            /*联网下载图片,并设置给<img>*/
+            function setImgFromNet (imgId,loadUrl,relativePath) {
+                //先设置下载中的默认图片
+                //创建下载任务
+                var dtask = plus.downloader.createDownload(loadUrl, {}, function(d, status) {
+                    if (status == 200) {
+                        //下载成功
+//                      console.log("下载成功");
+                        setImgFromLocal(imgId, d.filename);
+                    } else {
+                            picNum++;
+//                          console.log("下载失败");
+                        //下载失败,需删除本地临时文件,否则下次进来时会检查到图片已存在
+                        //dtask.abort();//文档描述:取消下载,删除临时文件;(但经测试临时文件没有删除,故使用delFile()方法删除);
+                        if (relativePath!=null)
+                            delFile(relativePath);
+                    }
+                });
+                //启动下载任务
+                dtask.start();
+            }
+
+            /*删除指定文件*/
+            function delFile(relativePath) {
+                plus.io.resolveLocalFileSystemURL(relativePath, function(entry) {
+                    entry.remove(function(entry) {
+                        console.log("文件删除成功");
+                    }, function(e) {
+                        console.log("文件删除失败" + relativePath);
+                    });
+                });
+            }
+
+            /*根据id查找元素*/
+            function $id(id) {
+                return document.getElementById(id);
+            }
+
+        </script>
+
+        <style type="text/css">
+
+            #shareSystem{
+                width: 100%;
+                background: #ef7550;
+                margin-top: 100px;
+                line-height: 50px;
+                text-align: center;
+                font-size: 18px;
+                color: #fff;
+            }
+        </style>
+    </head>
+    <body>
+
+            <div class="button" id="shareSystem">点我一键分享朋友圈</div>
+
+    </body>
+</html>
