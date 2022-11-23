@@ -14,13 +14,13 @@ public class Solution {
 
     public static int fib(int n){
         if(n<2) return n;
-       int[] res = new int[n+1];
-       res[0]=0;
-       res[1]=1;
+       int a=0,b=1;
        for(int i=2;i<n+1;i++){
-           res[i]=res[i-2]+res[i-1];
+           int c=a+b;
+           a=b;
+           b=c;
        }
-       return res[n];
+       return b;
     }
 
 }
