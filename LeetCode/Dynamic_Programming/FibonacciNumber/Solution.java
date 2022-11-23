@@ -9,12 +9,18 @@ public class Solution {
         Assert.assertEquals(1,fib(1));
         Assert.assertEquals(1,fib(2));
         Assert.assertEquals(5,fib(5));
-        fib(35);
+        Assert.assertEquals(9227465,fib(35));
     }
 
     public static int fib(int n){
         if(n<2) return n;
-        return fib(n-1)+fib(n-2);
+       int[] res = new int[n+1];
+       res[0]=0;
+       res[1]=1;
+       for(int i=2;i<n+1;i++){
+           res[i]=res[i-2]+res[i-1];
+       }
+       return res[n];
     }
 
 }
