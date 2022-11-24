@@ -15,13 +15,13 @@ public class Solution {
     public static int tribonacci(int n) {
         if(n<2) return n;
         if(n==2) return 1;
-        int[] res = new int[n+1];
-        res[0] = 0;
-        res[1] = 1;
-        res[2] = 1;
-        for(int i=3;i<n+1;i++){
-            res[i]=res[i-3]+res[i-2]+res[i-1];
+        int a=0,b=1,c=1;
+        for(int i=3;i<=n;i++){
+            int d=a+b+c;
+            a=b;
+            b=c;
+            c=d;
         }
-        return res[n];
+        return c;
     }
 }
