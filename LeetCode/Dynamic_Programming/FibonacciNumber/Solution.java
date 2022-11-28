@@ -1,6 +1,5 @@
 package Dynamic_Programming.FibonacciNumber;
 
-
 import org.junit.Assert;
 
 public class Solution {
