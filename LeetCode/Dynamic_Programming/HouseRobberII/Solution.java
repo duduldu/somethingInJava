@@ -2,6 +2,8 @@ package Dynamic_Programming.HouseRobberII;
 
 import org.junit.Assert;
 
+import java.util.Arrays;
+
 public class Solution {
 
     public static void main(String[] args) {
@@ -14,11 +16,8 @@ public class Solution {
     public static int rob(int[] nums) {
         int len = nums.length;
         if (len == 1) return nums[0];
-        int[] nums1 = new int[len - 1];
-        int[] nums2 = new int[len - 1];
-        System.arraycopy(nums, 0, nums1, 0, len - 1);
-        System.arraycopy(nums, 1, nums2, 0, len - 1);
-        return Math.max(rob1(nums1), rob1(nums2));
+        return Math.max(rob1(Arrays.copyOfRange(nums,0,len-1)),
+                rob1(Arrays.copyOfRange(nums,1,len)));
     }
 
     public static int rob1(int[] nums) {
