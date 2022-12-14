@@ -12,6 +12,21 @@ public class Solution {
     public static int maxSubArray(int[] nums) {
         int max = Integer.MIN_VALUE;
         int temp = nums[0];
-       return 0;
+        int tot[] = new int[nums.length];
+        for(int num:nums){
+            if(temp<=0){
+                if(num>=0){
+                    temp=num;
+                    max=num;
+                }
+                else {
+                    max=Math.max(temp,num);
+                }
+            }
+            else {
+
+            }
+        }
+       return max;
     }
 }
