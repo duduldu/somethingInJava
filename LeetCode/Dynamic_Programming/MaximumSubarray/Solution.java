@@ -21,6 +21,7 @@ public class Solution {
                 }
                 else {
                     max=Math.max(temp,num);
+                    tot[0]=max;
                 }
             }
             else {
