@@ -25,7 +25,7 @@ public class Solution {
                 }
             }
             else {
-
+                max+=num;
             }
         }
        return max;
